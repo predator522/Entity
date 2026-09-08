@@ -1,68 +1,38 @@
-const { MongoClient } = require("mongodb");
-const { mongoUri, mongoDb } = require("./config");
+const { MongoClient } = require('mongodb');
+const { config } = require('./config');
 
 let client;
-let db;
+let database;
 
 async function connectDB() {
-  if (db) return db;
-
-  client = new MongoClient(mongoUri);
-
+  client = new MongoClient(config.mongoUri, {
+    serverSelectionTimeoutMS: 15000,
+    connectTimeoutMS: 15000,
+    maxPoolSize: 20,
+    retryWrites: true
+  });
   await client.connect();
-
-  db = client.db(mongoDb);
-
-  await db.collection("users").createIndex(
-    { email: 1 },
-    { unique: true, sparse: true }
-  );
-
-  await db.collection("users").createIndex(
-    { phone: 1 },
-    { unique: true, sparse: true }
-  );
-
-  await db.collection("users").createIndex(
-    { telegramIds: 1 }
-  );
-
-  await db.collection("users").createIndex(
-    { lastActiveAt: 1 }
-  );
-
-  console.log(`MongoDB connected: ${mongoDb}`);
-
-  return db;
+  database = client.db(config.mongoDb);
+  await Promise.all([
+    database.collection('users').createIndex({ telegramIds: 1 }),
+    database.collection('users').createIndex({ username: 1 }),
+    database.collection('users').createIndex({ lastActiveAt: 1 }),
+    database.collection('users').createIndex({ role: 1 }),
+    database.collection('chats').createIndex({ userId: 1, createdAt: -1 }),
+    database.collection('messages').createIndex({ userId: 1, createdAt: -1 }),
+    database.collection('memory').createIndex({ userId: 1, createdAt: -1 }),
+    database.collection('activity').createIndex({ createdAt: -1 }),
+    database.collection('groups').createIndex({ chatId: 1 }, { unique: true }),
+    database.collection('forceChannels').createIndex({ channel: 1 }, { unique: true })
+  ]);
+  console.log(`MongoDB connected: ${config.mongoDb}`);
 }
 
-function users() {
-  if (!db) {
-    throw new Error("MongoDB is not connected.");
-  }
-
-  return db.collection("users");
+function db() {
+  if (!database) throw new Error('MongoDB is not connected.');
+  return database;
 }
 
-function chats() {
-  if (!db) {
-    throw new Error("MongoDB is not connected.");
-  }
+async function closeDB() { if (client) await client.close(); }
 
-  return db.collection("chats");
-}
-
-async function closeDB() {
-  if (client) {
-    await client.close();
-    client = null;
-    db = null;
-  }
-}
-
-module.exports = {
-  connectDB,
-  closeDB,
-  users,
-  chats
-};
+module.exports = { connectDB, closeDB, db };
