@@ -1,49 +1,7 @@
-const {
-  mainMenuKeyboard
-} = require("../keyboards/menu");
-const {
-  findByTelegramId
-} = require("../services/userService");
-const { isOwner } = require("../utils/owner");
-
-async function menuHandler(ctx) {
-  const user = await findByTelegramId(ctx.from.id);
-
-  if (!user) {
-    await ctx.reply(
-      `⚡ ENTITY 4.5
-
-You have joined the required channels.
-
-Now choose:
-
-📝 Create Account — make a new Entity account.
-🔐 Login — access an existing Entity account and its memory.
-
-Your Entity account is separate from your Telegram account.`,
-      mainMenuKeyboard({
-        owner: isOwner(ctx.from.id)
-      })
-    );
-
-    return;
-  }
-
-  await ctx.reply(
-    `⚡ ENTITY 4.5
-
-╭────────────────────╮
-│  🐕 THE UNLIMITED AI
-│
-│  Account: ${user.name}
-│  Reasoning: ${user.settings?.reasoningLevel || "standard"}
-╰────────────────────╯
-
-Choose an option below.`,
-    mainMenuKeyboard({
-      owner: isOwner(ctx.from.id)
-    })
-  );
-}
-
-module.exports = menuHandler;
+const { Markup } = require('telegraf');
+const { findByTelegramId,isOwner,getMemory } = require('../services/userService');
+const { usage } = require('../services/limitsService');
+const { mainKeyboard,backKeyboard } = require('../keyboards/menu');
+async function menu(ctx){ const u=await findByTelegramId(ctx.from.id); await ctx.reply('🐕 <b>ENTITY 4.5</b>\n\nChoose an option.',{parse_mode:'HTML',...mainKeyboard(isOwner(ctx.from.id))}); }
+async function renderMenu(ctx,action){ const u=await findByTelegramId(ctx.from.id); if(action==='menu_home') return ctx.editMessageText('🐕 <b>ENTITY 4.5</b>\n\nChoose an option.',{parse_mode:'HTML',...mainKeyboard(isOwner(ctx.from.id))}); if(action==='menu_chat') return ctx.editMessageText('💬 <b>Chat</b>\n\nSend me a normal message and Entity will handle it.',{parse_mode:'HTML',...backKeyboard()}); if(action==='menu_memory'){ const m=await getMemory(u?u._id:null,10); return ctx.editMessageText(m.length?'🧠 <b>Your Memory</b>\n\n'+m.map(x=>`• ${x.text}`).join('\n'):'🧠 <b>Your Memory</b>\n\nNo saved memory yet.\nUse /remember &lt;text&gt;.',{parse_mode:'HTML',...backKeyboard()}); } if(action==='menu_usage') return ctx.editMessageText(u?usage(u):'No Entity account record.',{...backKeyboard()}); if(action==='menu_account') return ctx.editMessageText(u?`👤 <b>ENTITY ACCOUNT</b>\n\nName: ${u.name||'—'}\nEmail: ${u.email||'—'}\nPhone: ${u.phone||'—'}\nRole: ${u.role||'user'}\nReasoning: ${u.settings?.reasoningLevel||'standard'}\nReminders: ${u.settings?.reminders===false?'OFF':'ON'}`:'🔐 <b>ENTITY ACCOUNT</b>\n\nNo account is linked yet.',{parse_mode:'HTML',...backKeyboard()}); if(action==='menu_settings') return ctx.editMessageText('⚙️ <b>Settings</b>\n\nUse /settings to change reminders and reasoning level.',{parse_mode:'HTML',...backKeyboard()}); if(action==='menu_owners') return ctx.editMessageText('👑 <b>Creators/Owners</b>\n\nEscanor\nMetro\n\nThe minds behind the dog without limits.',{parse_mode:'HTML',...backKeyboard()}); }
+module.exports={menu,renderMenu};
