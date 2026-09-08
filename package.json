@@ -1,11 +1,12 @@
 {
-  "name": "entity-4.5-phase-3",
-  "version": "3.0.0",
-  "description": "Entity 4.5 Telegram AI bot - Phase 3 with MongoDB accounts, persistent memory, owner controls and image generation",
+  "name": "entity-4.5-phase-3.5",
+  "version": "3.5.0",
+  "description": "Entity 4.5 Telegram AI bot - Phase 3.5 admin control center and converted Entity 5.0 foundation",
   "main": "src/bot.js",
   "scripts": {
     "start": "node src/bot.js",
-    "dev": "node --watch src/bot.js"
+    "dev": "node --watch src/bot.js",
+    "check": "node --check src/bot.js && find src -type f -name '*.js' -print0 | xargs -0 -n1 node --check"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
