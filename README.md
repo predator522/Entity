@@ -1,103 +1,47 @@
-# Entity 4.5 — Phase 3
+# 🐕 Entity 4.5
 
-# Phase 3 — Full Account & Intelligence Upgrade
+**The dog without limits.**
 
-Phase 3 adds:
+A Telegram AI assistant based on the Nex GPT codebase, rebuilt with the Entity 4.5 identity, UI, owners, force-join access gate and cleaner callback/error handling.
 
-- MongoDB-backed user accounts
-- Name, email, phone and password registration
-- Login from another Telegram account using email/phone + password
-- Persistent AI memory tied to the Entity account, not only Telegram ID
-- Account linking across Telegram accounts
-- Four-hour inactivity reminders
-- Owner-only AI reasoning upgrade controls
-- Phase 3 owner panel
-- Groq as the primary chat/coding engine
-- OpenRouter as fallback
-- MagicStudio/OmegaTech as the dedicated image engine
-- Image requests never intentionally route to Groq/OpenRouter
-- Existing force-join flow
-- Telegram-safe message splitting/retries
+## Included
 
-## Install
+- Entity 4.5 branding and response style
+- Escanor and Lucifer owner identity
+- Owner/admin separation
+- Force-join support for multiple channels
+- Working inline navigation
+- Chat, memory/context, usage, settings, developer tools and status
+- AI endpoint selection and admin endpoint controls
+- Broadcast confirmation
+- Maintenance mode
+- Rate limiting
+- No API request timeout configured in the HTTP client
+- HTML-safe AI responses so normal Markdown characters do not break Telegram messages
+- Node.js 18+
+
+## Owners
+
+- Escanor — `@Lion_sin_aboveall`
+- Lucifer — `@W0rm_h0le`
+
+Owner IDs must still be placed in `OWNER_IDS`; usernames are display information only.
+
+## Setup
 
 ```bash
 npm install
-```
-
-Copy `.env.example` to `.env` and fill in your real values.
-
-## Start
-
-```bash
+cp .env.example .env
+nano .env
 npm start
 ```
 
-## MongoDB
+The bot requires the Telegram bot to be an administrator in each force-join channel so membership checks can work reliably.
 
-Use either local MongoDB:
+## AI API
 
-```env
-MONGODB_URI=mongodb://127.0.0.1:27017
-MONGODB_DB=entity45
-```
+The default API remains the working endpoint architecture from the supplied project. Change `API_BASE_URL` and `DEFAULT_ENDPOINT` in `.env` if needed.
 
-or a MongoDB Atlas connection string.
+## Important
 
-Never put real API keys or the bot token in source code.
-
-## Important account behavior
-
-A user's AI memory belongs to their Entity 4.5 account.
-
-Example:
-
-1. Telegram account A registers as `John`.
-2. John chats with Entity 4.5 and memory is stored under John's account.
-3. John logs out or uses Telegram account B.
-4. John chooses Login and enters the same email/phone + password.
-5. Telegram account B is linked to John's Entity account.
-6. John's existing memory is available again.
-
-The bot does not expose passwords or password hashes to the AI.
-
-## Identity
-
-Entity 4.5 is the dog without limits.
-
-Creators/Owners:
-
-- Escanor
-- Metro
-
-This identity is included in the AI system prompt so Entity 4.5 answers ownership questions consistently.
-
-## Owner controls
-
-Set:
-
-```env
-OWNER_TELEGRAM_IDS=123456789,987654321
-```
-
-Only those Telegram IDs receive the owner controls.
-
-The owner panel currently includes:
-
-- Upgrade AI reasoning
-- Phase 3 control panel
-- Toggle reasoning mode
-
-The owner upgrade is stored on the owner's Entity account as `reasoningLevel`.
-
-## Reminder behavior
-
-A background worker checks users periodically.
-
-If a user has not interacted for at least `REMINDER_INTERVAL_HOURS`, Entity 4.5 sends:
-
-> 🐕 I'm still here. Entity 4.5 is waiting for you.
-
-The reminder timestamp is updated so it does not repeatedly spam the same user every scan.
-
-Users can disable reminders from Settings.
+Never put a real Telegram token or API credential into GitHub or share it in chat. The distributed `.env` file is intentionally removed from this package and replaced with `.env.example`.
